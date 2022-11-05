@@ -26,7 +26,8 @@ nav ul li{
 main{ 
     padding: 1rem; 
     width: 100%;      } 
-    .movie-holder{ 
+
+.movie-holder{ 
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
@@ -35,29 +36,19 @@ main{
 .movie-holder a{ 
     flex: 1; 
 }
-#loader { 
-    position: relative; 
-    height: 60px; 
-    width: 60px; 
-    display: grid; 
-    place-content: center; 
-    border-radius: 50%; 
-    border: 10px solid #ccc; 
-} 
-#loader::before{ 
-    box-sizing: border-box; 
-    position: absolute; 
-    content: ""; 
-    height: calc(100% + 22px); 
-    width: calc(100% + 22px); 
-    top: -11px; 
-    left: -11px; 
-    border-radius: 50%; 
-    border-style: solid; 
-    border-width: 10px; 
-    border-color: #081563 transparent transparent transparent; 
-    animation: rotate .6s linear infinite; 
-} 
+#loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin .6s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 .movie-img-wrapper{ 
     background-size: cover; 
     width: auto; 
@@ -119,9 +110,5 @@ gap: 1rem;
     width: 200px; 
     height: 35px; 
     padding: .5rem; 
-} 
-@keyframes rotate { 
-    from{transform: rotate(0deg);} 
-    to{transform: rotate(360deg);} 
 }
 
