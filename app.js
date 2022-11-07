@@ -1,10 +1,10 @@
-import {fetchMovieAvailability,fetchMovieList} from "./api.js"
+import {availibility, database, fetchMovieAvailability,fetchMovieList} from "./api.js"
 
 const mainElement = document.querySelector('main');
 let bookerGridHolder = document.getElementById('booker-grid-holder');
 let bookTicketBtn = document.getElementById('book-ticket-btn');
 let booker = document.getElementById('booker');
-
+console.log(availibility)
 async function renderMovies() {
     mainElement.innerHTML = `<div id='loader'></div>`;
     let movies = await fetchMovieList();
@@ -44,12 +44,13 @@ function setEventToLinks() {
 async function renderSeatsGrid(movieName) {
     bookerGridHolder.innerHTML = `<div id='loader'></div>`;
     bookTicketBtn.classList.add('v-none');
-    let data = await fetchMovieAvailability(movieName);
-    renderSeats(data);
-    setEventsToSeats();
+    let data = await fetchMovieAvailability(movieName); 
+    console.log(data)
+    renderSeats(data,movieName);
+    setEventsToSeats(movieName);
 }
 
-function renderSeats(data) {
+function renderSeats(data,movieName) {
     if (booker.firstElementChild.tagName !== "h3") {
         seatsSelected = [];
         booker.innerHTML = `<h3 class="v-none">Seat Selector</h3> 
@@ -60,10 +61,10 @@ function renderSeats(data) {
     bookTicketBtn = document.getElementById('book-ticket-btn');
     bookerGridHolder.innerHTML = '';
     booker.firstElementChild.classList.remove('v-none');
-    createSeatsGrid(data)
+    createSeatsGrid(data,movieName)
 }
 
-function createSeatsGrid(data) {
+function createSeatsGrid(data,movieName) {
     let bookingGrid1 = document.createElement("div");
     let bookingGrid2 = document.createElement("div");
     bookingGrid2.classList.add("booking-grid");
@@ -71,7 +72,7 @@ function createSeatsGrid(data) {
     for (let i = 1; i < 25; i++) {
         let seat = document.createElement("div");
         seat.innerHTML = i;
-        seat.setAttribute("id", `booking-grid-${i}`);
+        seat.setAttribute("id", `booking-grid-${i}`); //booking-grid-${item}
         if (data.includes(i)) seat.classList.add("seat", "unavailable-seat");
         else seat.classList.add("seat", "available-seat");
         if (i > 12) bookingGrid2.appendChild(seat);
@@ -79,16 +80,16 @@ function createSeatsGrid(data) {
     }
     bookerGridHolder.appendChild(bookingGrid1);
     bookerGridHolder.appendChild(bookingGrid2);
-    setTicketBooking();
+    setTicketBooking(movieName);
 }
 
 let seatsSelected = [];
 
-function setEventsToSeats() {
+function setEventsToSeats(movieName) {
     let AvaliableSeats = document.querySelectorAll('.available-seat');
     AvaliableSeats.forEach(seat => {
         seat.addEventListener('click', _ => {
-            saveSelectedSeat(seat);
+            saveSelectedSeat(seat,movieName);
         })
     })
 }
@@ -96,7 +97,7 @@ function setEventsToSeats() {
 function saveSelectedSeat(seat) {
     if (!seat.classList.contains("select-seat")) {
         seat.classList.add('select-seat');
-        seatsSelected.push(seat.innerText);
+        seatsSelected.push(Number(seat.innerText));
         bookTicketBtn.classList.remove('v-none');
     } else {
         seat.classList.remove('select-seat');
@@ -107,16 +108,16 @@ function saveSelectedSeat(seat) {
     }
 }
 
-function setTicketBooking() {
+function setTicketBooking(movieName) {
     bookTicketBtn.addEventListener('click', () => {
         if (seatsSelected.length > 0) {
             booker.innerHTML = '';
-            confirmTicket();
+            confirmTicket(movieName);
         }
     })
 }
 
-function confirmTicket() {
+function confirmTicket(movieName) {
     let confirmTicketElement = document.createElement('div');
     confirmTicketElement.setAttribute('id', 'confirm-purchase');
     let h3 = document.createElement('h3');
@@ -124,7 +125,7 @@ function confirmTicket() {
     confirmTicketElement.appendChild(h3);
     confirmTicketElement.appendChild(createForm());
     booker.appendChild(confirmTicketElement);
-    success();
+    success(movieName);
 }
 
 function createForm() {
@@ -138,12 +139,16 @@ function createForm() {
     return form;
 }
 
-function success() {
+function success(movieName) {
     let submitBtn = document.getElementById('submitBtn');
     submitBtn.addEventListener('click', (e) => {
         let form = document.getElementById('customer-detail-form');
         if (form.checkValidity()) {
             e.preventDefault();
+            if(seatsSelected.length>0){
+            availibility[movieName].push(...seatsSelected)
+        }
+
             let email = document.getElementById('email').value;
             let phone = document.getElementById('phone').value;
             renderSuccessMessage(email, phone);
